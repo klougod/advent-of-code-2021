@@ -68,6 +68,8 @@ void populate_bingo_file(ifstream *file, struct bingo *bingo) {
 
 }
 
+vector<int> known_i;
+
 int check_winner_part1(struct bingo *bingo, int value_to_find) {
   for(int i=0; i < bingo->tables.size(); ++i) {
     for(int j=0; j < bingo->tables[i].size(); ++j) {
@@ -79,67 +81,9 @@ int check_winner_part1(struct bingo *bingo, int value_to_find) {
     }
   }
 
-  int i,j,k;
-  for(i=0; i < bingo->tables.size(); ++i) {
-    for(j=0; j < bingo->tables[i].size(); ++j) {
-      bool found_row = true;
-      bool found_col = true;
-
-      for(k=0; k < bingo->tables[i][j].size(); ++k) {
-        if(!bingo->tables[i][k][j].checked) {
-          found_row = false;
-        }
-
-        if(!bingo->tables[i][j][k].checked) {
-          found_col = false;
-        }
-      }
-      if(found_row) {
-        int sum_of_unchecked = 0;
-        for(int l=0; l < bingo->tables[i].size(); ++l) {
-          for(int m=0; m < bingo->tables[i][l].size(); ++m) {
-            if(bingo->tables[i][l][m].checked == false) {
-              sum_of_unchecked += bingo->tables[i][l][m].value;
-            }
-          }
-        }
-        return sum_of_unchecked;
-      }
-
-      if(found_col) {
-        int sum_of_unchecked = 0;
-        for(int l=0; l < bingo->tables[i].size(); ++l) {
-          for(int m=0; m < bingo->tables[i][l].size(); ++m) {
-            if(bingo->tables[i][l][m].checked == false) {
-              sum_of_unchecked += bingo->tables[i][l][m].value;
-            }
-          }
-        }
-        return sum_of_unchecked;
-      }
-    }
-  }
-  return -1;
-}
-
-
-int check_winner_part2(struct bingo *bingo, int value_to_find) {
-  for(int i=0; i < bingo->tables.size(); ++i) {
-    for(int j=0; j < bingo->tables[i].size(); ++j) {
-      for(int k=0; k < bingo->tables[i][j].size(); ++k) {
-        if(bingo->tables[i][j][k].value == value_to_find) {
-          bingo->tables[i][j][k].checked = true;
-        }
-      }
-    }
-  }
-
   int sum_of_unchecked = 0;
-  int found_cell = 0;
 
   int i,j,k;
-
-  int checked_k = -1;
   for(i=0; i < bingo->tables.size(); ++i) {
     for(j=0; j < bingo->tables[i].size(); ++j) {
       bool found_row = true;
@@ -148,44 +92,49 @@ int check_winner_part2(struct bingo *bingo, int value_to_find) {
       for(k=0; k < bingo->tables[i][j].size(); ++k) {
         if(!bingo->tables[i][k][j].checked) {
           found_row = false;
-        } else {
-          checked_k = k;
         }
 
         if(!bingo->tables[i][j][k].checked) {
           found_col = false;
-        } else {
-          checked_k = k;
         }
       }
       if(found_row) {
-        found_cell = bingo->tables[i][j][checked_k].value;
-        sum_of_unchecked = 0;
-        for(int l=0; l < bingo->tables[i].size(); ++l) {
-          for(int m=0; m < bingo->tables[i][l].size(); ++m) {
-            if(bingo->tables[i][l][m].checked == false) {
-              sum_of_unchecked += bingo->tables[i][l][m].value;
+        if (find(known_i.begin(), known_i.end(), i) == known_i.end()) {
+          known_i.push_back(i);
+          sum_of_unchecked = 0;
+          for(int l=0; l < bingo->tables[i].size(); ++l) {
+            for(int m=0; m < bingo->tables[i][l].size(); ++m) {
+              if(bingo->tables[i][l][m].checked == false) {
+                sum_of_unchecked += bingo->tables[i][l][m].value;
+              }
             }
+          }
+          if(i == 44) {
+            cout << "VALUE TO FIND: " <<  value_to_find << " soma: " << sum_of_unchecked << endl;
           }
         }
       }
 
       if(found_col) {
-        found_cell = bingo->tables[i][j][checked_k].value;
-        sum_of_unchecked = 0;
-
-        for(int l=0; l < bingo->tables[i].size(); ++l) {
-          for(int m=0; m < bingo->tables[i][l].size(); ++m) {
-            if(bingo->tables[i][l][m].checked == false) {
-              sum_of_unchecked += bingo->tables[i][l][m].value;
+        if (find(known_i.begin(), known_i.end(), i) == known_i.end()) {
+          known_i.push_back(i);
+          sum_of_unchecked = 0;
+          for(int l=0; l < bingo->tables[i].size(); ++l) {
+            for(int m=0; m < bingo->tables[i][l].size(); ++m) {
+              if(bingo->tables[i][l][m].checked == false) {
+                sum_of_unchecked += bingo->tables[i][l][m].value;
+              }
             }
+          }
+          if(i == 44) {
+            cout << "VALUE TO FIND: " <<  value_to_find << " soma: " << sum_of_unchecked << endl;
           }
         }
       }
     }
-    cout << "FOUND_NUMBER_" << i << '\n';
   }
-  return sum_of_unchecked * found_cell;
+
+  return sum_of_unchecked;
 }
 
 void print_bingo(struct bingo *bingo) {
@@ -225,13 +174,14 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  known_i.clear();
+
   for(int i=0; i < bingogame.entry.size(); ++i) {
     int value_to_find = bingogame.entry[i];
-    int winner = check_winner_part2(&bingogame, value_to_find);
-    if(winner > 0) {
-      cout << "\n WINNER PART2 score is: " << winner << endl;
-    }
+    int winner = check_winner_part1(&bingogame, value_to_find);
   }
+
+  int last = known_i.back();
 
   print_bingo(&bingogame);
 
