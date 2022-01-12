@@ -160,6 +160,11 @@ void print_bingo(struct bingo *bingo) {
 }
 
 int main(int argc, char *argv[]) {
+  if(!argv[1]) {
+    printf("Please provide a valid filepath\n");
+    exit(1);
+  }
+
   ifstream inputFile (argv[1]);
   struct bingo bingogame;
 
@@ -173,6 +178,8 @@ int main(int argc, char *argv[]) {
       break;
     }
   }
+
+  print_bingo(&bingogame);
 
   known_i.clear();
 
